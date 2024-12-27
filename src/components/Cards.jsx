@@ -13,6 +13,7 @@ export const Cards = () => {
   const [flippedIndices, setFlippedIndices] = useState([]);
   const [matchedCards, setMatchedCards] = useState([]);
   const [isInitialFlip, setIsInitialFlip] = useState(true); // Track the initial flip state
+  const [isGameOver, setIsGameOver] = useState(false); // Track if the game is over
 
   // Handle card click
   const handleCardClick = (index) => {
@@ -36,20 +37,34 @@ export const Cards = () => {
     }
   }, [flippedIndices, cards]);
 
-  // Initial flip for 5 seconds
   useEffect(() => {
     if (isInitialFlip) {
       const timer = setTimeout(() => {
-        setIsInitialFlip(false); // Unflip cards after 5 seconds
-      }, 3000); // 5000ms = 5 seconds
+        setIsInitialFlip(false); 
+      }, 3000);
 
       return () => clearTimeout(timer); // Cleanup the timer
     }
   }, [isInitialFlip]);
 
+  // Check if game is over
+  useEffect(() => {
+    if (matchedCards.length === cards.length) {
+      setIsGameOver(true); // Set game over when all cards are matched
+    }
+  }, [matchedCards, cards.length]);
+
+  const restartGame = () => {
+    setCards(generateCards()); 
+    setFlippedIndices([]);
+    setMatchedCards([]); 
+    setIsInitialFlip(true);
+    setIsGameOver(false);
+  };
+
   return (
-    <div className="flex items-center justify-center">
-      <div className="grid grid-cols-4 gap-4">
+    <div className="flex items-center justify-center flex-col">
+      <div className="grid grid-cols-4 gap-4 mb-4">
         {cards.map((emoji, index) => {
           const isFlipped = isInitialFlip || flippedIndices.includes(index) || matchedCards.includes(index);
           const isMatched = matchedCards.includes(index); // Check if the card is matched
@@ -65,6 +80,14 @@ export const Cards = () => {
           );
         })}
       </div>
+
+      {isGameOver && (
+        <button 
+          onClick={restartGame} 
+          className="bg-lightViolet text-tesuoBlue py-2 px-4 rounded-md mt-4 hover:font-bold">
+          Play Again
+        </button>
+      )}
     </div>
   );
 };
